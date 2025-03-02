@@ -63,12 +63,8 @@ INSERT INTO workout_details (workout_id, exercise_id, sets, reps, weight) VALUES
 
 -- Для тренировки 5
 (5, 3, 3, 12, 40),  -- Становая тяга
-(5, 5, 4, 10, NULL), -- Подтягивания
+(5, 5, 4, 10, NULL); -- Подтягивания
 
--- Для тренировки 6
-(6, 1, 3, 10, 35),  -- Жим штанги
-(6, 2, 3, 12, 30),  -- Приседания
-(6, 4, 3, 15, NULL); -- Отжимания
 
 -- Добавление комментариев тренера
 INSERT INTO trainer_comments (workout_id, trainer_id, comment) VALUES

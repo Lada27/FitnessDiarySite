@@ -1,8 +1,8 @@
 <?php
 $host = 'localhost';
 $username = 'root';
-$password = 'root'; // Измените на ваш пароль от MAMP
-$database = 'fitness_diary'; // Изменено с fitness_db на fitness_diary
+$password = ''; //
+$database = 'fitness_diary'; 
 
 // Создание соединения
 $conn = new mysqli($host, $username, $password, $database);
