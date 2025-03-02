@@ -256,13 +256,41 @@ session_start();
                     <li class="nav-item">
                         <a class="nav-link active" href="index.php">Главная</a>
                     </li>
-                    <?php if(isset($_SESSION['user_id']) && $_SESSION['role'] === 'client'): ?>
-                        <li class="nav-item">
-                            <a class="nav-link" href="workout_diary.php">Дневник тренировок</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="progress.php">Мой прогресс</a>
-                        </li>
+                    <?php if(isset($_SESSION['user_id']) && isset($_SESSION['role'])): ?>
+                        <?php if($_SESSION['role'] === 'client'): ?>
+                            <li class="nav-item">
+                                <a class="nav-link" href="workout_diary.php">Дневник тренировок</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="progress.php">Мой прогресс</a>
+                            </li>
+                        <?php elseif($_SESSION['role'] === 'trainer'): ?>
+                            <li class="nav-item">
+                                <a class="nav-link" href="trainer/my_clients.php">Мои клиенты</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="trainer/create_program.php">Создать программу</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="trainer/my_programs.php">Мои программы</a>
+                            </li>
+                        <?php elseif($_SESSION['role'] === 'admin'): ?>
+                            <li class="nav-item">
+                                <a class="nav-link" href="admin/manage_users.php">Пользователи</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="admin/trainers.php">Тренеры</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="admin/manage_exercises.php">Упражнения</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="admin/manage_programs.php">Программы</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="admin/system_stats.php">Статистика</a>
+                            </li>
+                        <?php endif; ?>
                     <?php endif; ?>
                 </ul>
                 <ul class="navbar-nav">
@@ -271,7 +299,7 @@ session_start();
                             <a class="nav-link" href="profile.php">Личный кабинет</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="logout.php">Выход</a>
+                            <a class="nav-link" href="logout.php" onclick="return confirm('Вы действительно хотите выйти из аккаунта?')">Выход</a>
                         </li>
                     <?php else: ?>
                         <li class="nav-item">

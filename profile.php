@@ -130,25 +130,47 @@ $workouts = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                     <li class="nav-item">
                         <a class="nav-link" href="index.php">Главная</a>
                     </li>
-                    <?php if($role == 'client'): ?>
+                    <?php if($_SESSION['role'] === 'client'): ?>
                         <li class="nav-item">
                             <a class="nav-link" href="workout_diary.php">Дневник тренировок</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="progress.php">Мой прогресс</a>
                         </li>
-                    <?php elseif($role == 'trainer'): ?>
+                    <?php elseif($_SESSION['role'] === 'trainer'): ?>
                         <li class="nav-item">
-                            <a class="nav-link" href="clients.php">Мои клиенты</a>
+                            <a class="nav-link" href="trainer/my_clients.php">Мои клиенты</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="programs.php">Программы</a>
+                            <a class="nav-link" href="trainer/create_program.php">Создать программу</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="trainer/my_programs.php">Мои программы</a>
+                        </li>
+                    <?php elseif($_SESSION['role'] === 'admin'): ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="admin/manage_users.php">Пользователи</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="admin/trainers.php">Тренеры</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="admin/manage_exercises.php">Упражнения</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="admin/manage_programs.php">Программы</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="admin/system_stats.php">Статистика</a>
                         </li>
                     <?php endif; ?>
                 </ul>
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="logout.php">Выход</a>
+                        <a class="nav-link active" href="profile.php">Личный кабинет</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="logout.php" onclick="return confirm('Вы действительно хотите выйти из аккаунта?')">Выход</a>
                     </li>
                 </ul>
             </div>
@@ -302,7 +324,7 @@ $workouts = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                                     <td><?php echo htmlspecialchars($client['email']); ?></td>
                                                     <td><?php echo htmlspecialchars($client['phone']); ?></td>
                                                     <td>
-                                                        <a href="client_profile.php?id=<?php echo $client['id']; ?>" 
+                                                        <a href="trainer/client_profile.php?id=<?php echo $client['id']; ?>" 
                                                            class="btn btn-sm btn-primary">Просмотр</a>
                                                     </td>
                                                 </tr>
@@ -339,7 +361,7 @@ $workouts = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                                     <td><?php echo htmlspecialchars($program['type']); ?></td>
                                                     <td><?php echo htmlspecialchars($program['difficulty_level']); ?></td>
                                                     <td>
-                                                        <a href="edit_program.php?id=<?php echo $program['id']; ?>" 
+                                                        <a href="trainer/edit_program.php?id=<?php echo $program['id']; ?>" 
                                                            class="btn btn-sm btn-primary">Редактировать</a>
                                                     </td>
                                                 </tr>
@@ -348,7 +370,7 @@ $workouts = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                     </table>
                                 </div>
                             <?php endif; ?>
-                            <a href="create_program.php" class="btn btn-success mt-3">Создать программу</a>
+                            <a href="trainer/create_program.php" class="btn btn-success mt-3">Создать программу</a>
                         </div>
                     </div>
 
@@ -361,22 +383,22 @@ $workouts = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <a href="manage_users.php" class="btn btn-primary btn-lg w-100">
+                                    <a href="admin/manage_users.php" class="btn btn-primary btn-lg w-100">
                                         Управление пользователями
                                     </a>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <a href="manage_exercises.php" class="btn btn-primary btn-lg w-100">
+                                    <a href="admin/manage_exercises.php" class="btn btn-primary btn-lg w-100">
                                         Управление упражнениями
                                     </a>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <a href="system_stats.php" class="btn btn-primary btn-lg w-100">
+                                    <a href="admin/system_stats.php" class="btn btn-primary btn-lg w-100">
                                         Статистика системы
                                     </a>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <a href="manage_programs.php" class="btn btn-primary btn-lg w-100">
+                                    <a href="admin/manage_programs.php" class="btn btn-primary btn-lg w-100">
                                         Управление программами
                                     </a>
                                 </div>

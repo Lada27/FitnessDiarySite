@@ -60,6 +60,59 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
+// Обработка редактирования заметки
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['edit_note'])) {
+    $workout_id = intval($_POST['workout_id']);
+    $new_note = trim($_POST['note']);
+    
+    // Начинаем транзакцию
+    $conn->begin_transaction();
+    
+    try {
+        // Обновляем заметку
+        $sql = "UPDATE workout_diary SET notes = ? 
+                WHERE id = ? AND user_id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("sii", $new_note, $workout_id, $user_id);
+        $stmt->execute();
+
+        // Получаем информацию о тренере
+        $sql = "SELECT ct.trainer_id, u.name as client_name 
+                FROM client_trainer ct 
+                JOIN users u ON u.id = ct.client_id
+                WHERE ct.client_id = ? AND ct.end_date IS NULL";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $trainer_info = $stmt->get_result()->fetch_assoc();
+
+        if ($trainer_info) {
+            // Формируем текст уведомления с содержанием заметки
+            $notification_message = "Клиент " . $trainer_info['client_name'] . 
+                                  " обновил заметку к тренировке от " . date('d.m.Y', strtotime($selected_date)) . 
+                                  ".\n\nТекст заметки:\n" . $new_note;
+
+            // Отправляем уведомление тренеру
+            $sql = "INSERT INTO notifications (from_user_id, to_user_id, message) 
+                    VALUES (?, ?, ?)";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("iis", $user_id, $trainer_info['trainer_id'], $notification_message);
+            $stmt->execute();
+        }
+
+        // Завершаем транзакцию
+        $conn->commit();
+        
+        $success = 'Заметка успешно обновлена';
+        header("Location: workout_diary.php?date=" . $selected_date);
+        exit();
+    } catch (Exception $e) {
+        // В случае ошибки откатываем изменения
+        $conn->rollback();
+        $error = 'Ошибка при обновлении заметки: ' . $e->getMessage();
+    }
+}
+
 // Получение всех тренировок на выбранную дату
 $sql = "SELECT wd.*, wp.name as program_name, wp.type, wp.difficulty_level 
         FROM workout_diary wd
@@ -341,12 +394,31 @@ $workout_dates = array_column($workout_dates, 'workout_date');
                                         Сложность: <?php echo htmlspecialchars($workout['difficulty_level']); ?>
                                     </p>
                                     
-                                    <?php if($workout['notes']): ?>
-                                        <div class="mb-4">
-                                            <h6>Заметки:</h6>
-                                            <p><?php echo nl2br(htmlspecialchars($workout['notes'])); ?></p>
+                                    <div class="mb-3">
+                                        <h6>Заметки:</h6>
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div id="note_text_<?php echo $workout['id']; ?>">
+                                                <?php echo nl2br(htmlspecialchars($workout['notes'] ?? '')); ?>
+                                            </div>
+                                            <button class="btn btn-sm btn-outline-primary ms-2" 
+                                                    onclick="showEditNote(<?php echo $workout['id']; ?>)">
+                                                Изменить
+                                            </button>
                                         </div>
-                                    <?php endif; ?>
+                                        
+                                        <!-- Форма редактирования заметки -->
+                                        <form method="POST" id="edit_note_form_<?php echo $workout['id']; ?>" style="display: none;">
+                                            <input type="hidden" name="workout_id" value="<?php echo $workout['id']; ?>">
+                                            <div class="mb-2 mt-2">
+                                                <textarea class="form-control" name="note" rows="3"><?php echo htmlspecialchars($workout['notes'] ?? ''); ?></textarea>
+                                            </div>
+                                            <div class="d-flex justify-content-end gap-2">
+                                                <button type="button" class="btn btn-sm btn-secondary" 
+                                                        onclick="hideEditNote(<?php echo $workout['id']; ?>)">Отмена</button>
+                                                <button type="submit" name="edit_note" class="btn btn-sm btn-primary">Сохранить</button>
+                                            </div>
+                                        </form>
+                                    </div>
                                     
                                     <?php if(!empty($all_exercises[$workout['id']])): ?>
                                         <h6>Упражнения:</h6>
@@ -407,5 +479,16 @@ $workout_dates = array_column($workout_dates, 'workout_date');
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    function showEditNote(workoutId) {
+        document.getElementById('note_text_' + workoutId).style.display = 'none';
+        document.getElementById('edit_note_form_' + workoutId).style.display = 'block';
+    }
+
+    function hideEditNote(workoutId) {
+        document.getElementById('note_text_' + workoutId).style.display = 'block';
+        document.getElementById('edit_note_form_' + workoutId).style.display = 'none';
+    }
+    </script>
 </body>
 </html> 
