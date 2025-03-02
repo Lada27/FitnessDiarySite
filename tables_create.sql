@@ -68,7 +68,7 @@ CREATE TABLE workout_details (
     reps INT,
     weight DECIMAL(5,2),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (workout_id) REFERENCES workout_diary(id) ON DELETE CASCADE,
+    FOREIGN KEY (workout_id) REFERENCES workout_programs(id) ON DELETE CASCADE,
     FOREIGN KEY (exercise_id) REFERENCES exercises(id) ON DELETE CASCADE
 );
 
